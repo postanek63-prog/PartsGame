@@ -1,0 +1,45 @@
+local DataStoreService = game:GetService("DataStoreService")
+local Players = game:GetService("Players")
+
+local partsSpawnedStore = DataStoreService:GetDataStore("PartsSpawnedStore")
+
+local function setupLeaderstats(player)
+    local leaderstats = Instance.new("Folder")
+    leaderstats.Name = "leaderstats"
+    leaderstats.Parent = player
+
+    local partsSpawned = Instance.new("IntValue")
+    partsSpawned.Name = "PartsSpawned"
+    partsSpawned.Parent = leaderstats
+
+    -- Load value from DataStore
+    local success, savedValue = pcall(function()
+        return partsSpawnedStore:GetAsync(player.UserId)
+    end)
+    if success and typeof(savedValue) == "number" then
+        partsSpawned.Value = savedValue
+    else
+        partsSpawned.Value = 0
+    end
+end
+
+Players.PlayerAdded:Connect(function(player)
+    setupLeaderstats(player)
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+    local leaderstats = player:FindFirstChild("leaderstats")
+    if leaderstats then
+        local partsSpawned = leaderstats:FindFirstChild("PartsSpawned")
+        if partsSpawned then
+            pcall(function()
+                partsSpawnedStore:SetAsync(player.UserId, partsSpawned.Value)
+            end)
+        end
+    end
+end)
+
+-- For players already in game (if script is reloaded)
+for _, player in Players:GetPlayers() do
+    setupLeaderstats(player)
+end
