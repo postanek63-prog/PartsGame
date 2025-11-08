@@ -1,0 +1,104 @@
+--On Click--
+local Event = game.ReplicatedStorage:WaitForChild("PartSpawn")
+local Spawner = workspace.Chamber:WaitForChild("SpawnPart")
+
+local function CreatePart()
+	local part = Instance.new("Part")
+	part.Name = "Part"
+	part.Size = Vector3.new(3, 3, 3)
+	part.Anchored = false
+	part.Parent = workspace:WaitForChild("Parts")
+	part.CastShadow = false
+
+	-- Calculate random position inside the spawner’s area
+	local halfX = Spawner.Size.X / 2
+	local halfZ = Spawner.Size.Z / 2
+
+	local randomX = math.random(-halfX, halfX)
+	local randomZ = math.random(-halfZ, halfZ)
+
+	part.Position = Vector3.new(
+		Spawner.Position.X + randomX,
+		Spawner.Position.Y + 5, -- spawn slightly above the surface
+		Spawner.Position.Z + randomZ
+	)
+end
+
+Event.OnServerEvent:Connect(function(player)
+	local leaderstats = player:WaitForChild("leaderstats")
+	local PartsSpawned = leaderstats:WaitForChild("PartsSpawned")
+
+	CreatePart()
+	PartsSpawned.Value += 1
+end)
+--On Robux Payment--
+local Event = game.ReplicatedStorage.DevProducts.DevProduct500
+local Spawner = workspace.Chamber:WaitForChild("SpawnPart")
+
+local PartsFolder = workspace:FindFirstChild("Parts")
+if not PartsFolder then
+	PartsFolder = Instance.new("Folder")
+	PartsFolder.Name = "Parts"
+	PartsFolder.Parent = workspace
+end
+
+local function CreatePart()
+	local part = Instance.new("Part")
+	part.Name = "Part"
+	part.Size = Vector3.new(3, 3, 3)
+	part.Anchored = false
+	part.Parent = PartsFolder
+
+	-- Random position inside spawner area
+	local halfX = Spawner.Size.X / 2
+	local halfZ = Spawner.Size.Z / 2
+	local randomX = math.random(-halfX, halfX)
+	local randomZ = math.random(-halfZ, halfZ)
+
+	part.Position = Vector3.new(
+		Spawner.Position.X + randomX,
+		Spawner.Position.Y + 5,
+		Spawner.Position.Z + randomZ
+	)
+end
+
+Event.OnServerEvent:Connect(function(player)
+	print(player.Name .. " purchased the 500-part Dev Product!")
+	local LeaderstatsPartsSpawned = player:WaitForChild("leaderstats"):WaitForChild("PartsSpawned")
+
+	for i = 1, 500 do
+		wait()
+		LeaderstatsPartsSpawned.Value += 1
+		CreatePart()
+	end
+end)
+--Button Scripts--
+local cooldown = 0.1
+local lastClick = 0
+
+script.Parent.MouseButton1Click:Connect(function()
+    local now = tick()
+    if now - lastClick >= cooldown then
+        lastClick = now
+        game.ReplicatedStorage.PartSpawn:FireServer()
+    end
+end)
+
+
+local MarketplaceService = game:GetService("MarketplaceService")
+local player = game.Players.LocalPlayer
+local productId = 3451039669
+local Event = game.ReplicatedStorage.DevProducts.DevProduct500
+
+script.Parent.MouseButton1Click:Connect(function()
+	MarketplaceService:PromptProductPurchase(player, productId)
+end)
+
+MarketplaceService.PromptProductPurchaseFinished:Connect(function(plr, purchasedId, wasPurchased)
+	print("Haya")  -- This still prints
+	-- For testing, skip the plr check and just check product ID
+	if wasPurchased and purchasedId == productId then
+		print("Fired")
+		Event:FireServer()
+	end
+end)
