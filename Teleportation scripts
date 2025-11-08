@@ -1,0 +1,25 @@
+--In SSS--
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local teleportEvent = ReplicatedStorage:WaitForChild("TeleportPlayerChamber")
+local Workspace = game:GetService("Workspace")
+
+-- Set teleport destination (using Workspace.Part)
+local destinationPosition
+destinationPosition = Vector3.new(-219, 31, -219)
+
+
+teleportEvent.OnServerEvent:Connect(function(player)
+    if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        player.Character:MoveTo(destinationPosition)
+    end
+end)
+--In Button--
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local teleportEvent = ReplicatedStorage:WaitForChild("TeleportPlayerChamber")
+
+local button = script.Parent
+
+button.MouseButton1Click:Connect(function()
+    teleportEvent:FireServer()
+end)
+
